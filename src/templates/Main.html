@@ -3,12 +3,19 @@
 <head>
  <meta charset="UTF-8" />
  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
- <title>CV2 Camera Interface</title>
+ <title>Home Page</title>
+
+ <!-- Jersey 10 Font -->
+ <link rel="preconnect" href="https://fonts.googleapis.com">
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Jersey+10&display=swap" rel="stylesheet">
+
  <style>
    body {
      margin: 0;
-     font-family: Arial, sans-serif;
-     background-color: #f0f2f5;
+     font-family: 'Jersey 10', sans-serif;
+     color: #0067C5;
+     background: linear-gradient(135deg, #0067C5, #FFD700);
      display: flex;
      flex-direction: column;
      height: 100vh;
@@ -43,6 +50,42 @@
      cursor: pointer;
    }
 
+   /* Hamburger Menu */
+   .menu {
+     position: absolute;
+     top: 60px;
+     left: 0;
+     width: 200px;
+     height: calc(100vh - 60px);
+     background-color: #ffffff;
+     box-shadow: 2px 0 6px rgba(0, 0, 0, 0.1);
+     display: none;
+     flex-direction: column;
+     justify-content: space-between;
+     padding: 10px 0;
+     z-index: 1;
+   }
+
+   .menu.show {
+     display: flex;
+   }
+
+   .menu a {
+     padding: 12px 20px;
+     text-decoration: none;
+     color: #0067C5;
+     font-size: 25px;
+   }
+
+   .menu a:hover {
+     background-color: #f0f0f0;
+   }
+
+   .menu .logout {
+     border-top: 1px solid #eee;
+     margin-top: auto;
+   }
+
    /* Main Content */
    main {
      flex: 1;
@@ -72,9 +115,10 @@
 
    .take-photo-button {
      padding: 12px 24px;
-     font-size: 16px;
-     background-color: #007bff;
-     color: #fff;
+     font-size: 25px;
+     font-family: 'Jersey 10', sans-serif;
+     background-color: #FFD700;
+     color: #0067C5;
      border: none;
      border-radius: 25px;
      cursor: pointer;
@@ -90,19 +134,22 @@
 
  <header>
    <div class="hamburger" onclick="toggleMenu()">&#9776;</div>
-   <div class="profile-icon"></div>
+   <h1>Welcome!</h1>
+   <a href="Profile.html" target="_self" class="profile-link">
+     <div class="profile-icon"></div>
+   </a>
  </header>
 
  <div class="menu" id="menu">
-   <a href="#">Home</a>
-   <a href="#">Community</a>
-   <a href="#">About</a>
-     <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+   <a href="Main.html">Home</a>
+   <a href="index.html">Community</a>
+   <a href="About.html">About</a>
+   <a href="Login.html" class="logout">Logout</a>
  </div>
 
  <main>
-   <div class="video-window">
-     <img src="{{ url_for('video_feed') }}" id="cv2-window" />
+   <div class="video-window" id="cv2-window">
+     <!-- Placeholder for OpenCV video feed -->
    </div>
  </main>
 

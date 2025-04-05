@@ -3,23 +3,194 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>My Posts</title>
+  <title>Community Center</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+
+   <!-- Jersey 10 Font -->
+ <link rel="preconnect" href="https://fonts.googleapis.com">
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Jersey+10&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Jersey 10', sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 20px;
+      background: linear-gradient(135deg, #0067C5, #FFD700);
+    }
+
+   header {
+     position: relative;
+     height: 60px;
+     display: flex;
+     align-items: center;
+     justify-content: space-between;
+     padding: 0 20px;
+     margin-bottom: 10px;
+   }
+
+   .hamburger {
+     font-size: 24px;
+     cursor: pointer;
+   }
+
+   /* Hamburger Menu */
+   .menu {
+     position: absolute;
+     top: 60px;
+     left: 0;
+     width: 200px;
+     height: calc(100vh - 60px);
+     background-color: #ffffff;
+     box-shadow: 2px 0 6px rgba(0, 0, 0, 0.1);
+     display: none;
+     flex-direction: column;
+     justify-content: space-between;
+     padding: 10px 0;
+     z-index: 1;
+   }
+
+   .menu.show {
+     display: flex;
+   }
+
+   .menu a {
+     padding: 12px 20px;
+     text-decoration: none;
+     color: #0067C5;
+     font-size: 25px;
+   }
+
+   .menu a:hover {
+     background-color: #f0f0f0;
+   }
+
+   .menu .logout {
+     border-top: 1px solid #eee;
+     margin-top: auto;
+   }
+
+    h1 {
+      text-align: center;
+      flex: 1;
+      font-size: 2em;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+
+    .new-post {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+
+    .new-post h2 {
+      margin-bottom: 15px;
+      font-size: 1.5em;
+    }
+
+    .new-post form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .input-title,
+    .input-content {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    .post-btn {
+      background-color: #0067C5;
+      color: #fff;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .post-btn:hover {
+      background-color: #005bb5;
+    }
+
+    .posts {
+      margin-top: 40px;
+    }
+
+    .post {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+
+    .post-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .heart-btn {
+      font-size: 24px;
+      color: #FFD700; /* Empty heart initially */
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+
+    .heart-btn.liked {
+      color: red; /* Turns red when clicked */
+    }
+
+    .reply-input {
+      padding: 8px;
+      width: 300px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    .reply-btn {
+      background-color: #0067C5;
+      color: #fff;
+      padding: 8px 15px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
   <header>
-    <h1>My Blog</h1>
-    <form action="{{ url_for('run_camera') }}">
-  <button type="submit" class="post-btn">📷 Open Camera</button>
-</form>
+    <div class="hamburger" onclick="toggleMenu()">&#9776;</div>
+    <h1>Community Center</h1>
   </header>
+
+  <div class="menu" id="menu">
+    <a href="Main.html">Home</a>
+    <a href="index.html">Community</a>
+    <a href="About.html">About</a>
+    <a href="Login.html" class="logout">Logout</a>
+  </div>
 
   <main>
     <section class="new-post">
       <h2>Write a New Post</h2>
+      <button onclick="document.getElementById('file-input').click()">Choose Photo</button>
+      <button onclick="startCamera()">Take Photo</button>
+      <input type="file" id="file-input" style="display:none;" accept="image/*" />
       <form action="{{ url_for('submit_post') }}" method="POST">
         <input type="text" name="title" placeholder="Post Title" class="input-title" required />
-        <textarea name="content" placeholder="What's on your mind?" class="input-content" required></textarea>
+        <textarea name="content" placeholder="Share with the Community" class="input-content" required></textarea>
         <button type="submit" class="post-btn">Post</button>
       </form>
     </section>
@@ -27,20 +198,15 @@
     <section class="posts">
       <h2>Recent Posts</h2>
 
-      {% for post in posts %}
       <article class="post">
-        <h3>{{ post.title }}</h3>
+        <h3>Leafy Disaster</h3>
         <img src="{{ post.image }}" alt="Sample post image" class="post-img">
         <p>{{ post.content }}</p>
 
         <div class="post-actions">
-          <form action="{{ url_for('vote', action='upvote', post_id=post.id) }}" method="POST">
-            <button class="vote-btn">⬆️</button>
-          </form>
-          <span class="vote-count">{{ post.votes }}</span>
-          <form action="{{ url_for('vote', action='downvote', post_id=post.id) }}" method="POST">
-            <button class="vote-btn">⬇️</button>
-          </form>
+          <!-- Empty heart initially -->
+          <span class="heart-btn" onclick="toggleHeart(this)">🤍</span>
+          <span class="vote-count">230</span>
         </div>
 
         <div class="replies">
@@ -49,33 +215,47 @@
             <button type="submit" class="reply-btn">Reply</button>
           </form>
 
-          {% for reply in post.replies %}
           <div class="reply">
-            <p>{{ reply.text }} <span class="timestamp">{{ reply.timestamp }}</span></p>
+            <p>I think you could save it with sunlight! <span class="timestamp">1:40</span></p>
             <div class="reply-actions">
-              <form action="{{ url_for('vote_reply', action='upvote', post_id=post.id, reply_index=loop.index0) }}" method="POST">
-                <button class="vote-btn">⬆️</button>
-              </form>
-              <span class="vote-count">{{ reply.votes }}</span>
-              <form action="{{ url_for('vote_reply', action='downvote', post_id=post.id, reply_index=loop.index0) }}" method="POST">
-                <button class="vote-btn">⬇️</button>
-              </form>
+              <span class="heart-btn" onclick="toggleHeart(this)">🤍</span>
+              <span class="vote-count">130</span>
             </div>
           </div>
-          {% endfor %}
         </div>
       </article>
-      {% endfor %}
     </section>
-
-<button onclick="startCamera()">Start Camera</button>
-<script>
-  function startCamera() {
-    fetch('/start_camera')
-      .then(response => alert('Camera started'))
-      .catch(error => alert('Error starting camera: ' + error));
-  }
-</script>
   </main>
+
+  <script>
+    function startCamera() {
+      fetch('/start_camera')
+        .then(response => alert('Camera started'))
+        .catch(error => alert('Error starting camera: ' + error));
+    }
+
+    function toggleMenu() {
+      document.getElementById("menu").classList.toggle("show");
+    }
+
+    // Optional: click outside to close
+    document.addEventListener("click", function (e) {
+      const menu = document.getElementById("menu");
+      const hamburger = document.querySelector(".hamburger");
+      if (!menu.contains(e.target) && !hamburger.contains(e.target)) {
+        menu.classList.remove("show");
+      }
+    });
+
+    // Function to toggle heart color
+    function toggleHeart(element) {
+      if (element.textContent === '🤍') {
+        element.textContent = '❤️';
+      } else {
+        element.textContent = '🤍';
+      }
+    }
+
+  </script>
 </body>
 </html>

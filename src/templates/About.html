@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Jersey 10 Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Jersey+10&display=swap" rel="stylesheet" />
+  <title>About Agriculture Awareness</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f8f5;
+      color: #333;
+    }
+
+    header {
+      font-family: 'Jersey 10', sans-serif;
+      background: linear-gradient(135deg, #0067C5, #FFD700);
+      color: white;
+      padding: 1rem;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header-container {
+      color: black;
+      position: absolute;
+      left: 0;
+      right: 0;
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .header-container h1 {
+      margin: 0;
+      font-size: 2rem;
+      pointer-events: auto;
+    }
+
+    .hamburger {
+      font-size: 24px;
+      cursor: pointer;
+      z-index: 2;
+    }
+
+    .menu {
+      font-family: 'Jersey 10', sans-serif;
+      font-size: 25px;
+      position: absolute;
+      top: 60px;
+      left: 0;
+      width: 200px;
+      height: calc(100vh - 60px);
+      background-color: #ffffff;
+      box-shadow: 2px 0 6px rgba(0, 0, 0, 0.1);
+      display: none;
+      flex-direction: column;
+      justify-content: flex-start;
+      padding: 10px 0;
+      z-index: 1;
+    }
+
+    .menu.show {
+      display: flex;
+    }
+
+    .menu a {
+      padding: 12px 20px;
+      text-decoration: none;
+      color: #0067C5;
+      font-size: 25px;
+    }
+
+    .menu a:hover {
+      background-color: #f0f0f0;
+    }
+
+    .menu .logout {
+      border-top: 1px solid #eee;
+      margin-top: auto;
+    }
+
+    main {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 1rem;
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    p {
+      font-size: 1.1rem;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="hamburger" onclick="toggleMenu()">&#9776;</div>
+    <div class="header-container">
+      <h1>About Us</h1>
+    </div>
+    <!-- empty spacer to keep alignment -->
+    <div style="width: 24px;"></div>
+  </header>
+
+  <div class="menu" id="menu">
+    <a href="Main.html">Home</a>
+    <a href="index.html">Community</a>
+    <a href="About.html">About</a>
+    <a href="Login.html" class="logout">Logout</a>
+  </div>
+
+  <main>
+    <p>
+      Whether you’re a dedicated farmer, a weekend gardener, or someone who simply finds joy in the beauty of nature, agriculture touches your life more than you might realize. But here’s the thing—healthy crops start with awareness. Catching plant diseases early isn’t just important, it’s vital. It can mean the difference between saving a single plant and protecting an entire field. So whether you're growing, learning, or just curious—let’s take small steps together to support healthier agriculture.
+    </p>
+  </main>
+
+  <script>
+    function toggleMenu() {
+      document.getElementById("menu").classList.toggle("show");
+    }
+
+    document.addEventListener("click", function (e) {
+      const menu = document.getElementById("menu");
+      const hamburger = document.querySelector(".hamburger");
+      if (!menu.contains(e.target) && !hamburger.contains(e.target)) {
+        menu.classList.remove("show");
+      }
+    });
+  </script>
+</body>
+</html>

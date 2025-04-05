@@ -1,18 +1,10 @@
 from flask import Flask, render_template, Response, redirect, url_for, request, session
 import cv2
 import numpy as np
-from tensorflow.keras.models import load_model
-from tensorflow.keras.preprocessing.image import img_to_array
+from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
-
-# Load the trained model
-model = load_model('plant_disease_model.h5')  # Adjust the path if needed
-class_names = ['Pepper_bell_Baterial_spot', 'Pepper_bell_healthy', 'Potato_early_blight',
-               'Potato_healthy', 'Potato_Late_blight', 'Tomato_Target_Spot', 'Tomato_Tomato_mosaic_virus', 'Tomato_Tomato_YellowLeaf_Curl_Virus',
-               'Tomato_Bacterial_spot', 'Tomato_Early_Blight', 'Tomato_healthy', 'Tomato_Late_Blight'
-               'Tomato_Late_Blight', 'Tomato_Leaf_Mold', 'Tomato_Septoria_leaf_spot', 'Tomato_Spider_mites_Two_spotted_spider_mites']  # Replace with your actual class names
 
 # OpenCV Video Capture
 cap = cv2.VideoCapture(0)
@@ -27,17 +19,10 @@ def generate_frames():
         if not ret:
             break
 
-        # Resize for model prediction
+        # Resize for model prediction (if model loading is enabled)
         resized_frame = cv2.resize(frame, (256, 256))  # Match your model's input
-        image_array = img_to_array(resized_frame)
-        image_array = np.expand_dims(image_array, axis=0) / 255.0
-
-        # Predict using the model
-        predictions = model.predict(image_array)
-        predicted_class = class_names[np.argmax(predictions)]
-
-        # Display prediction on the frame
-        cv2.putText(frame, f'Prediction: {predicted_class}', (10, 30),
+        # Temporarily skipping prediction logic
+        cv2.putText(frame, f'Prediction: Model not loaded', (10, 30),
                     cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
         # Encode the frame in JPEG format
@@ -65,9 +50,18 @@ def video_feed():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        session['user_id'] = 'some_user_id'
-        return redirect(url_for('index'))
-    return render_template('Login.html')
+        # Get the values from the form
+        username = request.form['username']
+        password = request.form['password']
+
+        # Hardcoded credentials check
+        if username == 'admin@gmail.com' and password == '123':
+            session['user_id'] = 'admin'  # Store the session data
+            return redirect(url_for('index'))  # Redirect to the main page
+        else:
+            return 'Invalid credentials. Please try again.'  # Return error message for invalid login
+
+    return render_template('Login.html')  # Display the login page on GET request
 
 # Sign-up page
 @app.route('/signup', methods=['GET', 'POST'])
@@ -79,8 +73,19 @@ def signup():
 # Logout
 @app.route('/logout')
 def logout():
-    session.pop('user_id', None)
-    return redirect(url_for('login'))
+    session.pop('user_id', None)  # Remove session
+    return redirect(url_for('login'))  # Redirect to login page
+
+@app.route('/save_snapshot', methods=['POST'])
+def save_snapshot():
+    ret, frame = cap.read()
+    if ret:
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f'snapshot_{timestamp}.jpg'
+        filepath = f'static/snapshots/{filename}'
+        cv2.imwrite(filepath, frame)
+        print(f"Saved snapshot to {filepath}")
+    return redirect(url_for('index'))
 
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0", port=5000)
