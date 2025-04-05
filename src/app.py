@@ -1,7 +1,9 @@
 from flask import Flask, render_template, request, redirect, url_for
+import subprocess
+import threading
 
 app = Flask(__name__)
-print("hel")
+
 # Simulate a simple blog data structure
 posts = [
     {
@@ -21,6 +23,14 @@ posts = [
 def home():
     return render_template('index.html', posts=posts)
 
+@app.route('/login')
+def login():
+    return render_template('Login.html')
+
+@app.route('/signup')
+def signup():
+    return render_template('SignUp.html')
+
 @app.route('/submit_post', methods=['POST'])
 def submit_post():
     title = request.form['title']
@@ -29,7 +39,7 @@ def submit_post():
         "id": len(posts) + 1,
         "title": title,
         "content": content,
-        "image": "https://via.placeholder.com/600x300",  # Placeholder image
+        "image": "https://via.placeholder.com/600x300",
         "votes": 0,
         "replies": []
     })
@@ -63,6 +73,17 @@ def vote_reply(action, post_id, reply_index):
             elif action == 'downvote':
                 post['replies'][reply_index]['votes'] -= 1
     return redirect(url_for('home'))
+@app.route('/camera')
+def run_camera():
+    try:
+        subprocess.Popen(['python', 'Camera_app.py'])
+        return "<h2>Camera launched successfully. Check your webcam window.</h2><a href='/'>Back to Home</a>"
+    except Exception as e:
+        return f"<h2>Error launching camera: {e}</h2><a href='/'>Back to Home</a>"
+def launch_camera_on_start():
+    subprocess.Popen(['python', 'Camera_app.py'])
+
 
 if __name__ == '__main__':
+    threading.Thread(target=launch_camera_on_start).start()
     app.run(debug=True)

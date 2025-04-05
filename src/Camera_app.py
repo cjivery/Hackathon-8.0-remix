@@ -2,7 +2,7 @@ import cv2
 
 # Open default camera (0)
 cap = cv2.VideoCapture(0)
-print("hello")
+
 if not cap.isOpened():
     print("Cannot open camera")
     exit()
