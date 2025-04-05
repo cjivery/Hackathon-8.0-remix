@@ -121,7 +121,7 @@ def save_snapshot():
         filename = f'snapshot_{timestamp}.jpg'
         filepath = f'static/snapshots/{filename}'
         cv2.imwrite(filepath, frame)
-        print(f"Saved snapshot to {filepath}")
+        print(f"Snapshot saved to {filepath}")
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
