@@ -3,7 +3,7 @@ import cv2
 
 app = Flask(__name__)
 
-# Secret key for session management (required for session functionality)
+# Secret key for session management (required for session functionality)d
 app.secret_key = 'your_secret_key'
 
 # OpenCV Video Capture
