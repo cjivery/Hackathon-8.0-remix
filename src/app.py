@@ -2,32 +2,52 @@ from flask import Flask, render_template, Response, redirect, url_for, request, 
 import cv2
 import numpy as np
 from datetime import datetime
+from tensorflow.keras.models import load_model
+from tensorflow.keras.preprocessing.image import img_to_array
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
+
+# Load the trained model from the specified path
+model_path = r"C:\Users\sasuk\PycharmProjects\Hackathon-8.0-remix\plant_disease_model.h5"
+model = load_model(model_path)
+
+# Define your class names (update this list if needed)
+class_names = [
+    "Pepper_bell_Baterial_spot", "Pepper_bell_healthy",
+    "Potato_early_blight", "Potato_healthy", "Potato_Late_blight",
+    "Tomato_Target_Spot", "Tomato_Tomato_mosaic_virus", "Tomato_Tomato_YellowLeaf_Curl_Virus",
+    "Tomato_Bacterial_spot", "Tomato_Early_Blight", "Tomato_healthy", "Tomato_Late_Blight",
+    "Tomato_Leaf_Mold", "Tomato_Septoria_leaf_spot", "Tomato_Spider_mites_Two_spotted_spider_mites"
+]
 
 # OpenCV Video Capture
 cap = cv2.VideoCapture(0)
 if not cap.isOpened():
     print("Cannot open camera")
     exit()
-else:
-    print("Camera opened")
 
-# Video streaming function
+# Video streaming function with model prediction
 def generate_frames():
     while True:
         ret, frame = cap.read()
         if not ret:
             break
 
-        # Resize for model prediction (if model loading is enabled)
-        resized_frame = cv2.resize(frame, (256, 256))  # Match your model's input
-        # Temporarily skipping prediction logic
-        cv2.putText(frame, f'Prediction: Model not loaded', (10, 30),
+        # Resize frame to match the model's input size
+        resized_frame = cv2.resize(frame, (256, 256))
+        image_array = img_to_array(resized_frame)
+        image_array = np.expand_dims(image_array, axis=0) / 255.0
+
+        # Predict using the model
+        predictions = model.predict(image_array)
+        predicted_class = class_names[np.argmax(predictions)]
+
+        # Overlay the prediction on the original frame
+        cv2.putText(frame, f'Prediction: {predicted_class}', (10, 30),
                     cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
-        # Encode the frame in JPEG format
+        # Encode the frame as JPEG
         ret, buffer = cv2.imencode('.jpg', frame)
         if not ret:
             break
@@ -36,7 +56,7 @@ def generate_frames():
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
 
-# Route for the main page with camera
+# Route for the main page with camera feed
 @app.route('/')
 def index():
     if 'user_id' not in session:
@@ -48,21 +68,17 @@ def index():
 def video_feed():
     return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
-# Community page (formerly /community)
+# Community page (serving index.html as community page)
 @app.route('/community')
 def community():
-    # Example data; replace with actual post data from a database or list.
-    post = {
-        'image': 'static/sample.jpg',
-        'content': 'This is a sample post.'
-    }
-    return render_template('index.html', post=post)
-# Profile page route (newly added)
+    return render_template('index.html')
+
+# Profile page route
 @app.route('/profile')
 def profile():
-    return render_template('Profile.html')  # Assuming you have a Profile.html
+    return render_template('Profile.html')
 
-# About page
+# About page route
 @app.route('/about')
 def about():
     return render_template('About.html')
@@ -71,19 +87,17 @@ def about():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        # Get the values from the form
         username = request.form['username']
         password = request.form['password']
 
         # Hardcoded credentials check
         if username == 'admin@gmail.com' and password == '123':
-            session['user_id'] = 'admin'  # Store the session data
-            return redirect(url_for('index'))  # Redirect to the main page
-
+            session['user_id'] = 'admin'
+            return redirect(url_for('index'))
         else:
-            return 'Invalid credentials. Please try again.'  # Return error message for invalid login
+            return 'Invalid credentials. Please try again.'
 
-    return render_template('Login.html')  # Display the login page on GET request
+    return render_template('Login.html')
 
 # Sign-up page
 @app.route('/signup', methods=['GET', 'POST'])
@@ -92,12 +106,13 @@ def signup():
         return redirect(url_for('login'))
     return render_template('SignUp.html')
 
-# Logout
+# Logout route
 @app.route('/logout')
 def logout():
-    session.pop('user_id', None)  # Remove session
-    return redirect(url_for('login'))  # Redirect to login page
+    session.pop('user_id', None)
+    return redirect(url_for('login'))
 
+# Route to save a snapshot from the camera feed
 @app.route('/save_snapshot', methods=['POST'])
 def save_snapshot():
     ret, frame = cap.read()
@@ -109,18 +124,5 @@ def save_snapshot():
         print(f"Saved snapshot to {filepath}")
     return redirect(url_for('index'))
 
-
-@app.route('/submit_post', methods=['POST'])
-def submit_post():
-    # Retrieve form data (e.g., title, content, etc.)
-    title = request.form.get('title')
-    content = request.form.get('content')
-
-    # Process and save the post data as needed
-    # For now, we can simply print it or add it to a list/database
-    print(f"New post received: Title: {title}, Content: {content}")
-
-    # Redirect to the community page after processing
-    return redirect(url_for('community'))
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0", port=5000)
