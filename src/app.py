@@ -7,17 +7,20 @@ from tensorflow.keras.preprocessing.image import img_to_array
 import os
 from werkzeug.utils import secure_filename
 
+# Create necessary directories
 os.makedirs('static/snapshots', exist_ok=True)
+os.makedirs('static/uploads', exist_ok=True)
 
-
+# Initialize the Flask app and set secret key for session management
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
-# Load the trained model from the specified path
+# Load the trained model
 model_path = r"C:\Users\sasuk\PycharmProjects\Hackathon-8.0-remix\plant_disease_model.h5"
 model = load_model(model_path)
 
-# Define your class names (update this list if needed)
+
+# Define class names for prediction
 class_names = [
     "Pepper_bell_Baterial_spot", "Pepper_bell_healthy",
     "Potato_early_blight", "Potato_healthy", "Potato_Late_blight",
@@ -26,13 +29,13 @@ class_names = [
     "Tomato_Leaf_Mold", "Tomato_Septoria_leaf_spot", "Tomato_Spider_mites_Two_spotted_spider_mites"
 ]
 
-# OpenCV Video Capture
+# OpenCV Video Capture for camera feed
 cap = cv2.VideoCapture(0)
 if not cap.isOpened():
     print("Cannot open camera")
     exit()
 
-# Video streaming function with model prediction
+# Generate frames for video feed (real-time camera capture)
 def generate_frames():
     while True:
         ret, frame = cap.read()
@@ -48,7 +51,6 @@ def generate_frames():
 
         # Make prediction
         predictions = model.predict(image_array)
-        print("Predictions:", predictions)  # Debug: print raw model output
         predicted_class = class_names[np.argmax(predictions)]
 
         # Encode frame for web stream
@@ -62,9 +64,11 @@ def generate_frames():
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
 
+# Upload folder for image uploads
 UPLOAD_FOLDER = 'static/uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+# Predict image uploaded by the user
 @app.route('/predict_image', methods=['POST'])
 def predict_image():
     if 'image' not in request.files:
@@ -82,20 +86,14 @@ def predict_image():
     img = cv2.imread(filepath)
     if img is None:
         return "Failed to load image", 400  # Check if the image loaded correctly
-    print(f"Loaded image shape: {img.shape}")  # Debug: print image shape
     img = cv2.resize(img, (256, 256))
-    print(f"Resized image shape: {img.shape}")  # Debug: print resized shape
     img_array = img_to_array(img)
     img_array = np.expand_dims(img_array, axis=0) / 255.0  # Normalize the image
-    print(f"Image array shape after preprocessing: {img_array.shape}")  # Debug: print final array shape
 
     # Predict
     predictions = model.predict(img_array)
-    print(f"Raw Predictions: {predictions}")  # Debug: print raw model output
-
     predicted_class_idx = np.argmax(predictions)  # Get index of highest prediction
     predicted_class = class_names[predicted_class_idx]
-    print(f"Predicted Class: {predicted_class}")  # Debug: print predicted class
 
     return render_template('Results.html', prediction=predicted_class, image_path=filepath)
 
@@ -113,7 +111,7 @@ def index():
 
     return render_template('Main.html', snapshots=snapshot_urls)
 
-# Video feed route
+# Video feed route for camera
 @app.route('/video_feed')
 def video_feed():
     return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
@@ -121,7 +119,11 @@ def video_feed():
 # Community page (serving index.html as community page)
 @app.route('/community')
 def community():
-    return render_template('index.html')
+    posts = [
+        {'title': 'Leafy Disaster', 'image': 'sample_image.jpg', 'content': 'The leaves are wilting!'},
+        {'title': 'Fungal Infection', 'image': 'sample_image2.jpg', 'content': 'Fungus spotted on leaves!'}
+    ]
+    return render_template('index.html', posts=posts)
 
 # Profile page route
 @app.route('/profile')
@@ -133,7 +135,7 @@ def profile():
 def about():
     return render_template('About.html')
 
-# Login page
+# Login page route
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -149,7 +151,7 @@ def login():
 
     return render_template('Login.html')
 
-# Sign-up page
+# Sign-up page route
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
@@ -162,11 +164,20 @@ def logout():
     session.pop('user_id', None)
     return redirect(url_for('login'))
 
+@app.route('/submit_post', methods=['POST'])
+def submit_post():
+    # Your logic for submitting a post goes here
+    return redirect(url_for('community'))  # Or wherever you want to redirect after submission
+
+@app.route('/tutorial')
+def tutorial():
+    return render_template('Tutorial.html')
+
 # Route to save a snapshot from the camera feed
 @app.route('/save_snapshot', methods=['POST'])
 def save_snapshot():
     for _ in range(5):
-        cap.read()  # flush buffer
+        cap.read()  # Flush the buffer
     ret, frame = cap.read()
 
     if ret:

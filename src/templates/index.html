@@ -7,9 +7,9 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 
    <!-- Jersey 10 Font -->
- <link rel="preconnect" href="https://fonts.googleapis.com">
- <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
- <link href="https://fonts.googleapis.com/css2?family=Jersey+10&display=swap" rel="stylesheet">
+   <link rel="preconnect" href="https://fonts.googleapis.com">
+   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+   <link href="https://fonts.googleapis.com/css2?family=Jersey+10&display=swap" rel="stylesheet">
 
   <style>
     body {
@@ -20,56 +20,56 @@
       background: linear-gradient(135deg, #0067C5, #FFD700);
     }
 
-   header {
-     position: relative;
-     height: 60px;
-     display: flex;
-     align-items: center;
-     justify-content: space-between;
-     padding: 0 20px;
-     margin-bottom: 10px;
-   }
+    header {
+      position: relative;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      margin-bottom: 10px;
+    }
 
-   .hamburger {
-     font-size: 24px;
-     cursor: pointer;
-   }
+    .hamburger {
+      font-size: 24px;
+      cursor: pointer;
+    }
 
-   /* Hamburger Menu */
-   .menu {
-     position: absolute;
-     top: 60px;
-     left: 0;
-     width: 200px;
-     height: calc(100vh - 60px);
-     background-color: #ffffff;
-     box-shadow: 2px 0 6px rgba(0, 0, 0, 0.1);
-     display: none;
-     flex-direction: column;
-     justify-content: space-between;
-     padding: 10px 0;
-     z-index: 1;
-   }
+    /* Hamburger Menu */
+    .menu {
+      position: absolute;
+      top: 60px;
+      left: 0;
+      width: 200px;
+      height: calc(100vh - 60px);
+      background-color: #ffffff;
+      box-shadow: 2px 0 6px rgba(0, 0, 0, 0.1);
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 10px 0;
+      z-index: 1;
+    }
 
-   .menu.show {
-     display: flex;
-   }
+    .menu.show {
+      display: flex;
+    }
 
-   .menu a {
-     padding: 12px 20px;
-     text-decoration: none;
-     color: #0067C5;
-     font-size: 25px;
-   }
+    .menu a {
+      padding: 12px 20px;
+      text-decoration: none;
+      color: #0067C5;
+      font-size: 25px;
+    }
 
-   .menu a:hover {
-     background-color: #f0f0f0;
-   }
+    .menu a:hover {
+      background-color: #f0f0f0;
+    }
 
-   .menu .logout {
-     border-top: 1px solid #eee;
-     margin-top: auto;
-   }
+    .menu .logout {
+      border-top: 1px solid #eee;
+      margin-top: auto;
+    }
 
     h1 {
       text-align: center;
@@ -176,10 +176,11 @@
   </header>
 
   <div class="menu" id="menu">
-    <a href="Main.html">Home</a>
-    <a href="index.html">Community</a>
-    <a href="About.html">About</a>
-    <a href="Login.html" class="logout">Logout</a>
+    <a href="{{ url_for('index') }}">Home</a> <!-- Fixed link for Home -->
+    <a href="{{ url_for('community') }}">Community</a> <!-- Fixed link for Community -->
+    <a href="{{ url_for('about') }}">About</a>
+    <a href="{{ url_for('tutorial') }}">Tutorial</a>
+    <a href="{{ url_for('login') }}" class="logout">Logout</a> <!-- Fixed logout link -->
   </div>
 
   <main>
@@ -191,16 +192,18 @@
       <form action="{{ url_for('submit_post') }}" method="POST">
         <input type="text" name="title" placeholder="Post Title" class="input-title" required />
         <textarea name="content" placeholder="Share with the Community" class="input-content" required></textarea>
-        <button type="submit" class="post-btn">Post</button>
+        <label type="submit">Submit Post</label>
       </form>
     </section>
 
     <section class="posts">
       <h2>Recent Posts</h2>
 
+      <!-- Loop through posts passed from Flask -->
+      {% for post in posts %}
       <article class="post">
-        <h3>Leafy Disaster</h3>
-        <img src="{{ post.image }}" alt="Sample post image" class="post-img">
+        <h3>{{ post.title }}</h3>
+        <img src="{{ url_for('static', filename='uploads/' + post.image) }}" alt="Sample post image" class="post-img"> <!-- Use url_for to access static files -->
         <p>{{ post.content }}</p>
 
         <div class="post-actions">
@@ -212,7 +215,7 @@
         <div class="replies">
           <form class="reply-form" action="{{ url_for('submit_reply', post_id=post.id) }}" method="POST">
             <input type="text" name="reply_text" placeholder="Write a reply..." class="reply-input" required>
-            <button type="submit" class="reply-btn">Reply</button>
+            <label type="submit" class="reply-btn">Reply</label>
           </form>
 
           <div class="reply">
@@ -224,6 +227,7 @@
           </div>
         </div>
       </article>
+      {% endfor %}
     </section>
   </main>
 
@@ -255,7 +259,6 @@
         element.textContent = '🤍';
       }
     }
-
   </script>
 </body>
 </html>

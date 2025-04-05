@@ -93,6 +93,7 @@
       justify-content: center;
       align-items: center;
       position: relative;
+      flex-direction: column;
     }
 
     .video-window {
@@ -124,6 +125,7 @@
       border-radius: 25px;
       cursor: pointer;
       transition: background-color 0.3s ease;
+      margin-top: 20px;
     }
 
     .take-photo-button:hover {
@@ -145,6 +147,7 @@
     <a href="{{ url_for('index') }}">Home</a>
     <a href="{{ url_for('community') }}">Community</a>
     <a href="{{ url_for('about') }}">About</a>
+    <a href="{{ url_for('tutorial') }}">Tutorial</a> <!-- Added Tutorial Link -->
     <a href="{{ url_for('logout') }}" class="logout">Logout</a>
   </div>
 
@@ -152,39 +155,53 @@
     <div class="video-window" id="cv2-window">
       <img src="{{ url_for('video_feed') }}" alt="Live Camera Feed" style="width:100%; height:100%; object-fit: cover;">
     </div>
-  </main>
-<section style="margin-top: 30px; text-align: center;">
-  <h2 style="color: #fff;">📸 Snapshot Gallery</h2>
-  <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; padding: 10px;">
-    {% for snapshot in snapshots %}
-      <a href="{{ url_for('static', filename=snapshot.split('static/')[1]) }}" target="_blank">
-        <img src="{{ url_for('static', filename=snapshot.split('static/')[1]) }}"
-             alt="Snapshot"
-             style="width: 150px; height: auto; border: 2px solid white; border-radius: 10px;" />
-      </a>
-    {% endfor %}
-  </div>
-</section>
-<section style="text-align: center; margin-top: 30px;">
-  <h2 style="color: #fff;">🧪 Upload Image for Prediction</h2>
-  <form action="{{ url_for('predict_image') }}" method="post" enctype="multipart/form-data">
-    <input type="file" name="image" accept="image/*" required>
-    <button type="submit" class="take-photo-button">Predict</button>
-  </form>
-</section>
-  <footer>
-  <form method="post" action="{{ url_for('save_snapshot') }}">
-    <button type="submit" class="take-photo-button">Take Photo</button>
-  </form>
-</footer>
 
+    <!-- Take Photo Button moved here -->
+    <form method="post" action="{{ url_for('save_snapshot') }}">
+      <button type="submit" class="take-photo-button">Take Photo</button>
+    </form>
+  </main>
+
+  <!-- Prediction Results Section -->
+  <section style="margin-top: 30px; text-align: center;">
+    <h2 style="color: #fff;">Prediction Result</h2>
+    <p style="font-size: 18px; color: #fff;">Prediction: {{ prediction }}</p>
+  </section>
+
+  <!-- Snapshot Gallery Section -->
+  <section style="margin-top: 30px; text-align: center;">
+    <h2 style="color: #fff;">📸 Snapshot Gallery</h2>
+    <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; padding: 10px;">
+      {% for snapshot in snapshots %}
+        <a href="{{ url_for('static', filename=snapshot.split('static/')[1]) }}" target="_blank">
+          <img src="{{ url_for('static', filename=snapshot.split('static/')[1]) }}"
+               alt="Snapshot"
+               style="width: 150px; height: auto; border: 2px solid white; border-radius: 10px;" />
+        </a>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Image Upload for Prediction Section -->
+  <section style="text-align: center; margin-top: 30px;">
+    <h2 style="color: #fff;">🧪 Upload Image for Prediction</h2>
+    <form action="{{ url_for('predict_image') }}" method="post" enctype="multipart/form-data">
+      <input type="file" name="image" accept="image/*" required>
+      <button type="submit" class="take-photo-button">Predict</button>
+    </form>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <!-- Optionally you could add another form here or footer content if needed -->
+  </footer>
 
   <script>
     function toggleMenu() {
       document.getElementById("menu").classList.toggle("show");
     }
 
-    // Optional: click outside to close
+    // Optional: click outside to close the menu
     document.addEventListener("click", function (e) {
       const menu = document.getElementById("menu");
       const hamburger = document.querySelector(".hamburger");

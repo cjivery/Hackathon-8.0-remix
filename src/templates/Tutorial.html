@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tutorial - # App</title>
+
+   <!-- Jersey 10 Font -->
+ <link rel="preconnect" href="https://fonts.googleapis.com">
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Jersey+10&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      background: linear-gradient(135deg, #0067C5, #FFD700);
+      padding: 20px;
+      line-height: 1.6;
+      max-width: 800px;
+      margin: auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh; /* Full height of the viewport */
+      flex-direction: column;
+      position: relative;
+    }
+
+    h1 {
+      color: #2c3e50;
+      font-family: 'Jersey 10', sans-serif;
+      text-align: center; /* Horizontally center the text */
+    }
+
+    /* Hamburger Menu */
+    .hamburger {
+      font-family: 'Jersey 10', sans-serif;
+      font-size: 36px;
+      cursor: pointer;
+      position: absolute;
+      top: 20px;
+      left: 0;
+      z-index: 2; /* Ensure it stays above other content */
+    }
+
+    .menu {
+      position: absolute;
+      top: 60px;
+      left: 0;
+      width: 200px;
+      height: calc(100vh - 60px);
+      background-color: #ffffff;
+      box-shadow: 2px 0 6px rgba(0, 0, 0, 0.1);
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 10px 0;
+      z-index: 1;
+    }
+
+    .menu.show {
+      display: flex;
+    }
+
+    .menu a {
+      padding: 12px 20px;
+      text-decoration: none;
+      color: #0067C5;
+      font-size: 25px;
+    }
+
+    .menu a:hover {
+      background-color: #f0f0f0;
+    }
+
+    .menu .logout {
+      border-top: 1px solid #eee;
+      margin-top: auto;
+    }
+
+    ul {
+      list-style-type: disc;
+      margin-left: 20px;
+    }
+
+    section {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 700px; /* Ensuring the section is not too wide */
+    }
+  </style>
+</head>
+<body>
+  <div class="hamburger" onclick="toggleMenu()">&#9776;</div> <!-- Hamburger in upper-left corner -->
+  <section>
+    <header>
+      <h1>Welcome to #!</h1>
+    </header>
+    <div class="menu" id="menu">
+      <a href="Main.html">Home</a>
+      <a href="index.html">Community</a>
+      <a href="About.html">About</a>
+      <a href="Tutorial.html">Tutorial</a>
+      <a href="Login.html" class="logout">Logout</a>
+    </div>
+    <p>This is your guide to using the app:</p>
+    <ul>
+      <li>Find the plant you want to identify and analyze.</li>
+      <li>Take a picture of the plant — you'll see its <strong>description</strong>, <strong>diagnosis</strong>, and possible <strong>solutions</strong>.</li>
+      <li>Tap the <strong>Save</strong> button to keep the photo and analysis in your <strong>History</strong>.</li>
+      <li>View all your saved pictures in the <strong>History</strong> section.</li>
+      <li>To edit your profile, tap the <strong>icon on the top right corner</strong>.</li>
+      <li>Use the <strong>dropdown menu on the top left</strong> to go to the <strong>Community</strong> section where you can:
+        <ul>
+          <li>Share your plant pictures in blog-style posts</li>
+          <li>View other users’ posts to help spread awareness</li>
+        </ul>
+      </li>
+      <li>If you need a refresher, visit the <strong>Tutorial</strong> section anytime.</li>
+    </ul>
+  </section>
+
+<script>
+   function toggleMenu() {
+     document.getElementById("menu").classList.toggle("show");
+   }
+
+   // Optional: click outside to close
+   document.addEventListener("click", function (e) {
+     const menu = document.getElementById("menu");
+     const hamburger = document.querySelector(".hamburger");
+     if (!menu.contains(e.target) && !hamburger.contains(e.target)) {
+       menu.classList.remove("show");
+     }
+   });
+ </script>
+</body>
+</html>
