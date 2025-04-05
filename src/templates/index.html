@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Blog</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+  <header>
+    <h1>My Blog</h1>
+  </header>
+
+  <main>
+    <section class="new-post">
+      <h2>Write a New Post</h2>
+      <form action="{{ url_for('submit_post') }}" method="POST">
+        <input type="text" name="title" placeholder="Post Title" class="input-title" required />
+        <textarea name="content" placeholder="What's on your mind?" class="input-content" required></textarea>
+        <button type="submit" class="post-btn">Post</button>
+      </form>
+    </section>
+
+    <section class="posts">
+      <h2>Recent Posts</h2>
+
+      {% for post in posts %}
+      <article class="post">
+        <h3>{{ post.title }}</h3>
+        <img src="{{ post.image }}" alt="Sample post image" class="post-img">
+        <p>{{ post.content }}</p>
+
+        <div class="post-actions">
+          <form action="{{ url_for('vote', action='upvote', post_id=post.id) }}" method="POST">
+            <button class="vote-btn">⬆️</button>
+          </form>
+          <span class="vote-count">{{ post.votes }}</span>
+          <form action="{{ url_for('vote', action='downvote', post_id=post.id) }}" method="POST">
+            <button class="vote-btn">⬇️</button>
+          </form>
+        </div>
+
+        <div class="replies">
+          <form class="reply-form" action="{{ url_for('submit_reply', post_id=post.id) }}" method="POST">
+            <input type="text" name="reply_text" placeholder="Write a reply..." class="reply-input" required>
+            <button type="submit" class="reply-btn">Reply</button>
+          </form>
+
+          {% for reply in post.replies %}
+          <div class="reply">
+            <p>{{ reply.text }} <span class="timestamp">{{ reply.timestamp }}</span></p>
+            <div class="reply-actions">
+              <form action="{{ url_for('vote_reply', action='upvote', post_id=post.id, reply_index=loop.index0) }}" method="POST">
+                <button class="vote-btn">⬆️</button>
+              </form>
+              <span class="vote-count">{{ reply.votes }}</span>
+              <form action="{{ url_for('vote_reply', action='downvote', post_id=post.id, reply_index=loop.index0) }}" method="POST">
+                <button class="vote-btn">⬇️</button>
+              </form>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </article>
+      {% endfor %}
+    </section>
+
+<button onclick="startCamera()">Start Camera</button>
+<script>
+  function startCamera() {
+    fetch('/start_camera')
+      .then(response => alert('Camera started'))
+      .catch(error => alert('Error starting camera: ' + error));
+  }
+</script>
+  </main>
+</body>
+</html>
