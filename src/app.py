@@ -83,6 +83,10 @@ def profile():
 def about():
     return render_template('About.html')
 
+@app.route('/tutorial')
+def tutorial():
+    return render_template('Tutorial.html')
+
 # Login page
 @app.route('/login', methods=['GET', 'POST'])
 def login():
