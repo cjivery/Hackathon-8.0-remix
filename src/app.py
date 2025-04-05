@@ -4,6 +4,11 @@ import numpy as np
 from datetime import datetime
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.image import img_to_array
+import os
+from werkzeug.utils import secure_filename
+
+os.makedirs('static/snapshots', exist_ok=True)
+
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -32,36 +37,81 @@ def generate_frames():
     while True:
         ret, frame = cap.read()
         if not ret:
+            print("Failed to grab frame")
             break
 
-        # Resize frame to match the model's input size
+        # Resize & preprocess frame
         resized_frame = cv2.resize(frame, (256, 256))
-        image_array = img_to_array(resized_frame)
+        rgb_frame = cv2.cvtColor(resized_frame, cv2.COLOR_BGR2RGB)
+        image_array = img_to_array(rgb_frame)
         image_array = np.expand_dims(image_array, axis=0) / 255.0
 
-        # Predict using the model
+        # Make prediction
         predictions = model.predict(image_array)
+        print("Predictions:", predictions)  # Debug: print raw model output
         predicted_class = class_names[np.argmax(predictions)]
 
-        # Overlay the prediction on the original frame
-        cv2.putText(frame, f'Prediction: {predicted_class}', (10, 30),
-                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-
-        # Encode the frame as JPEG
+        # Encode frame for web stream
         ret, buffer = cv2.imencode('.jpg', frame)
         if not ret:
+            print("Failed to encode frame")
             break
+
         frame = buffer.tobytes()
 
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+
+UPLOAD_FOLDER = 'static/uploads'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+@app.route('/predict_image', methods=['POST'])
+def predict_image():
+    if 'image' not in request.files:
+        return "No file uploaded", 400
+
+    file = request.files['image']
+    if file.filename == '':
+        return "No selected file", 400
+
+    filename = secure_filename(file.filename)
+    filepath = os.path.join(UPLOAD_FOLDER, filename)
+    file.save(filepath)
+
+    # Preprocess image
+    img = cv2.imread(filepath)
+    if img is None:
+        return "Failed to load image", 400  # Check if the image loaded correctly
+    print(f"Loaded image shape: {img.shape}")  # Debug: print image shape
+    img = cv2.resize(img, (256, 256))
+    print(f"Resized image shape: {img.shape}")  # Debug: print resized shape
+    img_array = img_to_array(img)
+    img_array = np.expand_dims(img_array, axis=0) / 255.0  # Normalize the image
+    print(f"Image array shape after preprocessing: {img_array.shape}")  # Debug: print final array shape
+
+    # Predict
+    predictions = model.predict(img_array)
+    print(f"Raw Predictions: {predictions}")  # Debug: print raw model output
+
+    predicted_class_idx = np.argmax(predictions)  # Get index of highest prediction
+    predicted_class = class_names[predicted_class_idx]
+    print(f"Predicted Class: {predicted_class}")  # Debug: print predicted class
+
+    return render_template('Results.html', prediction=predicted_class, image_path=filepath)
 
 # Route for the main page with camera feed
 @app.route('/')
 def index():
     if 'user_id' not in session:
         return redirect(url_for('login'))
-    return render_template('Main.html')
+
+    # Get list of snapshot filenames
+    snapshot_folder = 'static/snapshots'
+    snapshots = os.listdir(snapshot_folder)
+    snapshots.sort(reverse=True)  # Show latest first
+    snapshot_urls = [f'{snapshot_folder}/{filename}' for filename in snapshots]
+
+    return render_template('Main.html', snapshots=snapshot_urls)
 
 # Video feed route
 @app.route('/video_feed')
@@ -115,13 +165,19 @@ def logout():
 # Route to save a snapshot from the camera feed
 @app.route('/save_snapshot', methods=['POST'])
 def save_snapshot():
+    for _ in range(5):
+        cap.read()  # flush buffer
     ret, frame = cap.read()
+
     if ret:
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         filename = f'snapshot_{timestamp}.jpg'
         filepath = f'static/snapshots/{filename}'
         cv2.imwrite(filepath, frame)
         print(f"Snapshot saved to {filepath}")
+    else:
+        print("Failed to capture snapshot.")
+
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
