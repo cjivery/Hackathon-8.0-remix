@@ -14,7 +14,6 @@
      height: 100vh;
    }
 
-
    /* Header */
    header {
      position: relative;
@@ -25,14 +24,13 @@
      justify-content: space-between;
      padding: 0 20px;
      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+     z-index: 2;
    }
-
 
    .hamburger {
      font-size: 24px;
      cursor: pointer;
    }
-
 
    .profile-icon {
      width: 35px;
@@ -45,7 +43,6 @@
      cursor: pointer;
    }
 
-
    /* Main Content */
    main {
      flex: 1;
@@ -55,7 +52,6 @@
      position: relative;
    }
 
-
    .video-window {
      width: 640px;
      height: 480px;
@@ -63,7 +59,6 @@
      border: 4px solid #333;
      border-radius: 10px;
    }
-
 
    /* Footer */
    footer {
@@ -74,7 +69,6 @@
      background-color: #ffffff;
      box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
    }
-
 
    .take-photo-button {
      padding: 12px 24px;
@@ -87,7 +81,6 @@
      transition: background-color 0.3s ease;
    }
 
-
    .take-photo-button:hover {
      background-color: #0056b3;
    }
@@ -95,24 +88,42 @@
 </head>
 <body>
 
-
  <header>
-   <div class="hamburger">&#9776;</div> <!-- Hamburger icon -->
-   <div class="profile-icon"></div> <!-- Profile icon -->
+   <div class="hamburger" onclick="toggleMenu()">&#9776;</div>
+   <div class="profile-icon"></div>
  </header>
 
+ <div class="menu" id="menu">
+   <a href="#">Home</a>
+   <a href="#">Community</a>
+   <a href="#">About</a>
+     <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+ </div>
 
  <main>
-   <div class="video-window" id="cv2-window">
-     <!-- Placeholder for OpenCV video feed -->
+   <div class="video-window">
+     <img src="{{ url_for('video_feed') }}" id="cv2-window" />
    </div>
  </main>
-
 
  <footer>
    <button class="take-photo-button">Take Photo</button>
  </footer>
 
+ <script>
+   function toggleMenu() {
+     document.getElementById("menu").classList.toggle("show");
+   }
+
+   // Optional: click outside to close
+   document.addEventListener("click", function (e) {
+     const menu = document.getElementById("menu");
+     const hamburger = document.querySelector(".hamburger");
+     if (!menu.contains(e.target) && !hamburger.contains(e.target)) {
+       menu.classList.remove("show");
+     }
+   });
+ </script>
 
 </body>
 </html>
